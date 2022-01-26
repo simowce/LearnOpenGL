@@ -1,0 +1,3 @@
+/home/simowce/Github/LearnOpenGL/build/CMakeFiles/rebuild_cache.dir
+/home/simowce/Github/LearnOpenGL/build/CMakeFiles/edit_cache.dir
+/home/simowce/Github/LearnOpenGL/build/CMakeFiles/opengl.dir
