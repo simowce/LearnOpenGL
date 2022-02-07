@@ -16,7 +16,7 @@ const char *vertexShaderSource = "#version 330 core\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
     "}\0";
 
-const char *fragmentShaderSource = "version 330 core\n"
+const char *fragmentShaderSource = "#version 330 core\n"
     "out vec4 FragColor;\n"
     "void main()\n"
     "{\n"
@@ -48,7 +48,7 @@ int main(void)
         return -1;
     }
 
-    glViewport(0, 0, 100, 100);
+    glViewport(0, 0, 800, 600);
 
     // vertex shader
     unsigned int vertexShader;
@@ -60,7 +60,7 @@ int main(void)
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &ret);
     if (!ret) {
         glGetShaderInfoLog(vertexShader, 512, NULL, log);
-        std::cout << "ERROR! shader compile error: " << log << std::endl;
+        std::cout << "ERROR! vertex shader compile error: " << log << std::endl;
     }
 
     // fragment shader
@@ -68,6 +68,11 @@ int main(void)
     fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
     glCompileShader(fragmentShader);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &ret);
+    if (!ret) {
+        glGetShaderInfoLog(vertexShader, 512, NULL, log);
+        std::cout << "ERROR! fragment shader compile error: " << log << std::endl;
+    }
 
     // program
     unsigned int shaderProgram;
@@ -75,6 +80,11 @@ int main(void)
     glAttachShader(shaderProgram, vertexShader);
     glAttachShader(shaderProgram, fragmentShader);
     glLinkProgram(shaderProgram);
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &ret);
+    if (!ret) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, log);
+        std::cout << "ERROR: program link error: " << log << std::endl;
+    }
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
