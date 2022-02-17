@@ -8,9 +8,10 @@ const static int SHADER_LOG_LEN = 512;
 const static int PROGRAM_LOG_LEN = SHADER_LOG_LEN;
 
 const float vertices[] = {
-    -0.5f, -0.5f, 0.0f,
-    0.5f, -0.5f, 0.0f,
-    0.0f, 0.5f, 0.0f
+    // location         // color
+    -0.5f, -0.5f, 0.0f, 1.f, 0.f, 0.f,
+    0.5f, -0.5f, 0.0f,  0.f, 1.f, 0.f,
+    0.0f, 0.5f, 0.0f,   0.f, 0.f, 1.f
 };
 
 const float vertices2[] = {
@@ -26,22 +27,24 @@ unsigned int indices[] = {
 
 const char *vertexShaderSource = "#version 330 core\n"
     "layout(location=0) in vec3 aPos;\n"
+    "layout(location=1) in vec3 aColor;\n"
+    "out vec3 ourColor;\n"
     "void main()\n"
     "{\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   ourColor = aColor;\n"
     "}\0";
 
 const char *fragmentShaderSource = "#version 330 core\n"
+    "in vec3 ourColor;\n"
     "out vec4 FragColor;\n"
-    "uniform vec4 fragColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = fragColor;\n"
+    "   FragColor = vec4(ourColor, 1.f);\n"
     "}\n\0";
 
 const char *fragmentShaderSourceYellow = "#version 330 core\n"
     "out vec4 FragColor;\n"
-    "uniform vec4 fragColor;\n"
     "void main()\n"
     "{\n"
     "   FragColor = fragColor;\n"
@@ -99,8 +102,10 @@ void createVaoVbo(unsigned int* vao, unsigned int *vbo, const float * vertexData
 
     std::cout << "size: " << sizeof(*vertexData) << std::endl;
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 }
 
 void Uniform(int program) {
@@ -170,16 +175,15 @@ int main(void)
 
         // glClearColor(0.2f, 0.3f, 0.3f, 1.f);
         // glClear(GL_COLOR_BUFFER_BIT);
-        Uniform(shaderProgram);
+        // Uniform(shaderProgram);
 
-        // glUseProgram(shaderProgram);
+        glUseProgram(shaderProgram);
         glBindVertexArray(VAO[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        Uniform(shaderProgramYellow);
-        // glUseProgram(shaderProgramYellow);
-        glBindVertexArray(VAO[1]);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        // Uniform(shaderProgramYellow);
+        // glBindVertexArray(VAO[1]);
+        // glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
