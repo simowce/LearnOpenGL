@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -32,16 +33,18 @@ const char *vertexShaderSource = "#version 330 core\n"
 
 const char *fragmentShaderSource = "#version 330 core\n"
     "out vec4 FragColor;\n"
+    "uniform vec4 fragColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = fragColor;\n"
     "}\n\0";
 
 const char *fragmentShaderSourceYellow = "#version 330 core\n"
     "out vec4 FragColor;\n"
+    "uniform vec4 fragColor;\n"
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 1.0f, 0.0f, 1.0f);\n"
+    "   FragColor = fragColor;\n"
     "}\n\0";
 
 void processInput(GLFWwindow* window) {
@@ -98,6 +101,15 @@ void createVaoVbo(unsigned int* vao, unsigned int *vbo, const float * vertexData
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
     glEnableVertexAttribArray(0);
+}
+
+void Uniform(int program) {
+    float timeValue = glfwGetTime();
+    float green = (sin(timeValue) / 2.0f) + 0.5f;
+    int ucolor = glGetUniformLocation(program, "fragColor");
+    glUseProgram(program);
+    if (ucolor != -1)
+        glUniform4f(ucolor, 0.f, green, 0.f, 1.f);
 }
 
 int main(void)
@@ -158,12 +170,14 @@ int main(void)
 
         // glClearColor(0.2f, 0.3f, 0.3f, 1.f);
         // glClear(GL_COLOR_BUFFER_BIT);
+        Uniform(shaderProgram);
 
-        glUseProgram(shaderProgram);
+        // glUseProgram(shaderProgram);
         glBindVertexArray(VAO[0]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        glUseProgram(shaderProgramYellow);
+        Uniform(shaderProgramYellow);
+        // glUseProgram(shaderProgramYellow);
         glBindVertexArray(VAO[1]);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
