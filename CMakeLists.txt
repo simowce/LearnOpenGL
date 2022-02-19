@@ -11,7 +11,7 @@ set(SOURCE_PATH ${CMAKE_SOURCE_DIR}/src)
 # https://stackoverflow.com/questions/956640/linux-c-error-undefined-reference-to-dlopen/22996058
 set (CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -ldl")
 
-add_executable(opengl ${SOURCE_PATH}/main.cpp ${SOURCE_PATH}/glad.c)
+add_executable(opengl ${SOURCE_PATH}/main.cpp ${SOURCE_PATH}/Shader.cpp ${SOURCE_PATH}/glad.c)
 
 # main.cpp:(.text+0x9): undefined reference to `glfwInit'
 # /usr/bin/ld: main.cpp:(.text+0x18): undefined reference to `glfwWindowHint'
