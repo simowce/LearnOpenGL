@@ -30,11 +30,12 @@ Shader::Shader(const char *vsPath, const char *fsPath)
 
         vsStr = vsStream.str();
         fsStr = fsStream.str();
-        vsCode = vsStr.c_str();
-        fsCode = fsStr.c_str();
     } catch (std::ifstream::failure e) {
         std::cout << "ERROR! read shader file failed: " << e.what() << std::endl;
     }
+
+    vsCode = vsStr.c_str();
+    fsCode = fsStr.c_str();
 
     mVertexShaderID = initShader(vsPath, vsCode, GL_VERTEX_SHADER);
     mFragmentShaderID = initShader(fsPath, fsCode, GL_FRAGMENT_SHADER);
@@ -86,6 +87,11 @@ unsigned int Shader::initProgram(int vs, int fs)
 void Shader::use()
 {
     glUseProgram(mProgramID);
+}
+
+unsigned int Shader::getProgramID()
+{
+    return mProgramID;
 }
 
 void Shader::setInt(const char *name, int v)

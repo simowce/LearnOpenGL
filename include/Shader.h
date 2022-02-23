@@ -7,6 +7,8 @@ public:
 
     void use();
 
+    unsigned int getProgramID();
+
     void setInt(const char *name, int v);
 
     void setBool(const char *name, bool v);
