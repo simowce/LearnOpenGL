@@ -6,6 +6,8 @@ set(SOURCE_PATH ${CMAKE_SOURCE_DIR}/src)
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/fmt)
 
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib/glm)
+
 # /usr/bin/ld: /usr/lib/gcc/x86_64-linux-gnu/9/../../../x86_64-linux-gnu/Scrt1.o: in function `_start':
 # (.text+0x24): undefined reference to `main'
 # /usr/bin/ld: CMakeFiles/opengl.dir/src/glad.c.o: in function `open_gl':

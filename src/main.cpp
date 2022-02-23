@@ -1,15 +1,21 @@
 #include "Shader.h"
 #include "common.h"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/ext.hpp>
+#include <glm/gtx/string_cast.hpp>
+
 const static int SHADER_LOG_LEN = 512;
 const static int PROGRAM_LOG_LEN = SHADER_LOG_LEN;
 
 const float vertices[] = {
-    // location        // color       // texture
-    0.5f, 0.5f, 0.f,   1.f, 0.f, 0.f, 1.f, 1.f,
-    0.5f, -0.5f, 0.f,  0.f, 1.f, 0.f, 1.f, 0.f,
-    -0.5f, -0.5f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f,
-    -0.5f, 0.5f, 0.f,  1.f, 1.f, 0.f, 0.f, 1.f
+    // location         // texture
+    0.5f, 0.5f, 0.f,    1.f, 1.f,
+    0.5f, -0.5f, 0.f,   1.f, 0.f,
+    -0.5f, -0.5f, 0.f,  0.f, 0.f,
+    -0.5f, 0.5f, 0.f,   0.f, 1.f
 };
 
 const int indices[] = {
@@ -30,14 +36,12 @@ void createVaoVbo(unsigned int* vao, unsigned int *vbo, const float * vertexData
     glBindBuffer(GL_ARRAY_BUFFER, *vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(float) * count, vertexData, GL_STATIC_DRAW);
 
-    std::cout << "size: " << sizeof(*vertexData) << std::endl;
+    const int vertexAttribCount = 5;
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, vertexAttribCount * sizeof(float), (void*)0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, vertexAttribCount * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
 }
 
 unsigned int createEBO(const int*eboData, const int count) {
@@ -57,6 +61,21 @@ void Uniform(int program) {
     glUseProgram(program);
     if (ucolor != -1)
         glUniform4f(ucolor, 0.f, green, 0.f, 1.f);
+}
+
+void testMatrix(unsigned int program) {
+    glm::vec4 vec(1.f, 0.f, 0.f, 1.f);
+    glm::mat4 trans = glm::mat4(1.f);
+
+    // trans = glm::rotate(trans, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
+    // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
+    trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.f));
+    trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.f, 0.f, 1.f));
+
+    unsigned int transformLoc = glGetUniformLocation(program, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+
+    // std::cout << "location: " << transformLoc << " matrix: " << glm::to_string(trans) << std::endl; 
 }
 
 int main(void)
@@ -88,8 +107,8 @@ int main(void)
     glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttribs);
     std::cout << "This machine support vertex attributes'count: " << maxVertexAttribs << std::endl;
 
-    const char *vsPath = "../shader/triangle.vs";
-    const char *fsPath = "../shader/triangle.fs";
+    const char *vsPath = "../shader/matrix.vs";
+    const char *fsPath = "../shader/matrix.fs";
 
     Shader s(vsPath, fsPath);
 
@@ -109,8 +128,8 @@ int main(void)
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
-        // glClearColor(0.2f, 0.3f, 0.3f, 1.f);
-        // glClear(GL_COLOR_BUFFER_BIT);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.f);
+        glClear(GL_COLOR_BUFFER_BIT);
         Uniform(s.getProgramID());
 
         glActiveTexture(GL_TEXTURE0);
@@ -119,6 +138,9 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texID2);
 
         s.use();
+        // IMPORTANT! MUST glUseProgram first before glGetUniformLocation
+        testMatrix(s.getProgramID());
+
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
