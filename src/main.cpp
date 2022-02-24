@@ -12,10 +12,47 @@ const static int PROGRAM_LOG_LEN = SHADER_LOG_LEN;
 
 const float vertices[] = {
     // location         // texture
-    0.5f, 0.5f, 0.f,    1.f, 1.f,
-    0.5f, -0.5f, 0.f,   1.f, 0.f,
-    -0.5f, -0.5f, 0.f,  0.f, 0.f,
-    -0.5f, 0.5f, 0.f,   0.f, 1.f
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 };
 
 const int indices[] = {
@@ -63,17 +100,19 @@ void Uniform(int program) {
         glUniform4f(ucolor, 0.f, green, 0.f, 1.f);
 }
 
-void testMatrix(unsigned int program) {
+void mvp(Shader& s, int screenWidth, int screenHeight) {
     glm::vec4 vec(1.f, 0.f, 0.f, 1.f);
-    glm::mat4 trans = glm::mat4(1.f);
+    glm::mat4 m = glm::mat4(1.f);
+    glm::mat4 v = glm::mat4(1.f);
+    glm::mat4 p = glm::mat4(1.f);
 
-    // trans = glm::rotate(trans, glm::radians(90.f), glm::vec3(0.f, 0.f, 1.f));
-    // trans = glm::scale(trans, glm::vec3(0.5, 0.5, 0.5));
-    trans = glm::translate(trans, glm::vec3(0.5f, -0.5f, 0.f));
-    trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.f, 0.f, 1.f));
+    // m = glm::rotate(m, (float)glfwGetTime() * glm::radians(50.f), glm::vec3(0.5f, 1.f, 0.f));
+    v = glm::translate(v, glm::vec3(0.f, 0.f, -3.f));
+    p = glm::perspective(glm::radians(45.f), static_cast<float>(screenWidth/screenHeight), 0.1f, 100.f);
 
-    unsigned int transformLoc = glGetUniformLocation(program, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(trans));
+    // s.setMat4f("model", m);
+    s.setMat4f("view", v);
+    s.setMat4f("projection", p);
 
     // std::cout << "location: " << transformLoc << " matrix: " << glm::to_string(trans) << std::endl; 
 }
@@ -98,7 +137,9 @@ int main(void)
         return -1;
     }
 
-    glViewport(0, 0, 800, 600);
+    const int screenWidth = 800, screenHeight = 600;
+
+    glViewport(0, 0, screenWidth, screenWidth);
 
     unsigned int texID = loadTexture("../texture/container.jpg", false);
     unsigned int texID2 = loadTexture("../texture/awesomeface.png", true);
@@ -125,9 +166,12 @@ int main(void)
     s.setInt("ourTexture", 0);
     s.setInt("ourTexture2", 1);
 
+    glEnable(GL_DEPTH_TEST);
+
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(0.2f, 0.3f, 0.3f, 1.f);
         glClear(GL_COLOR_BUFFER_BIT);
         Uniform(s.getProgramID());
@@ -139,10 +183,30 @@ int main(void)
 
         s.use();
         // IMPORTANT! MUST glUseProgram first before glGetUniformLocation
-        testMatrix(s.getProgramID());
+        mvp(s, screenWidth, screenHeight);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        const glm::vec3 cubePositions[] = {
+          glm::vec3( 0.0f,  0.0f,  0.0f), 
+          glm::vec3( 2.0f,  5.0f, -15.0f), 
+          glm::vec3(-1.5f, -2.2f, -2.5f),  
+          glm::vec3(-3.8f, -2.0f, -12.3f),  
+          glm::vec3( 2.4f, -0.4f, -3.5f),  
+          glm::vec3(-1.7f,  3.0f, -7.5f),  
+          glm::vec3( 1.3f, -2.0f, -2.5f),  
+          glm::vec3( 1.5f,  2.0f, -2.5f), 
+          glm::vec3( 1.5f,  0.2f, -1.5f), 
+          glm::vec3(-1.3f,  1.0f, -1.5f)  
+        };
+        for (unsigned int i = 0; i < 10; i++) {
+            glm::mat4 model = glm::mat4(1.f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.f * i;
+            model = glm::rotate(model, (float)glfwGetTime() * glm::radians(angle), glm::vec3(1.f, 0.3f, 0.5f));
+            s.setMat4f("model", model);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
 
         glfwSwapBuffers(window);
         glfwPollEvents();
